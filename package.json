@@ -1,0 +1,13 @@
+{
+  "name": "tm-plugin_syslog",
+  "version": "1.0.0",
+  "description": "TANlockManager syslog Plugin",
+  "main": "index.js",
+  "pluginType": "eventPlugin",
+  "repository": "https://github.com/FATH-Mechatronics/tm-plugin_syslog",
+  "author": "Fath Mechatronics GmbH",
+  "license": "AGPL-3.0",
+  "private": true,
+  "dependencies": {
+  }
+}
