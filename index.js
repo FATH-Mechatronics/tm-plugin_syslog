@@ -15,7 +15,7 @@ const SYSLOG_PRI = (1) * 8 + (5)  // Facility: user-level messages (1); Severity
 const SYSLOG_VERSION = 1
 const SYSLOG_APP_NAME = "TANlockManager"
 const SYSLOG_PROCID = `PID${process.pid}`
-const SYSLOG_PRIVATE_ENTERPRISE_NUMBER = "61208" //"Fath" Alphabet Position
+const SYSLOG_PRIVATE_ENTERPRISE_NUMBER = "50102" //https://www.iana.org/assignments/enterprise-numbers/enterprise-numbers Fath Mechatronics
 const SYSLOG_NILVALUE = "-"
 const SYSLOG_BOM = "\ufeff"
 
