@@ -20,6 +20,7 @@ const SYSLOG_NILVALUE = "-"
 const SYSLOG_BOM = "\ufeff"
 
 let _config = {};
+let inited = false;
 let udpSocket;
 let tcpSocket;
 let tlsSocket;
@@ -52,7 +53,10 @@ function _getConfigSync() {
 function _onEvent(type, body) {
     let syslogMsg = _createSysLogMsg(type, body);
     // console.log(syslogMsg);
-    if (_config.useTCP||_config.useTLS) {
+    if (!inited) {
+        return
+    }
+    if (_config.useTCP || _config.useTLS) {
         if (_config.tcpOC || _config.tcpTLS) {
             syslogMsg = _addOctettCount(syslogMsg);
         } else {
@@ -119,12 +123,12 @@ function _createEventStructured(body) {
 }
 
 function _createObjStructured(name, obj) {
-    if(obj == null){
+    if (obj == null) {
         return "";
-    }else{
+    } else {
         let data = "";
-        for(let [key, value] of Object.entries(obj)){
-            data = _splittAppend(data,`${key}="${value}"`);
+        for (let [key, value] of Object.entries(obj)) {
+            data = _splittAppend(data, `${key}="${value}"`);
         }
         return `[${name}@${SYSLOG_PRIVATE_ENTERPRISE_NUMBER} ${data}]`;
     }
@@ -210,16 +214,21 @@ function _sendTls(msg) {
 module.exports = {
     init: (config) => {
         _config = _getConfigSync() //Load Init Conf
-        if (_config.useTCP||_config.tcpTLS) { //Open Syslog Socket
-            if (_config.tcpTLS) {
-                tlsSocket = tls.connect(_config.port, _config.host);
+        try {
+            if (_config.useTCP || _config.tcpTLS) { //Open Syslog Socket
+                if (_config.tcpTLS) {
+                    tlsSocket = tls.connect(_config.port, _config.host);
+                } else {
+                    tcpSocket = net.createConnection(_config.port, _config.host);
+                }
             } else {
-                tcpSocket = net.createConnection(_config.port, _config.host);
+                udpSocket = dgram.createSocket('udp4', () => {
+                    udpSocket.setBroadcast(true); // Allow Broadcast
+                });
             }
-        } else {
-            udpSocket = dgram.createSocket('udp4',()=>{
-                udpSocket.setBroadcast(true); // Allow Broadcast
-            });
+            inited = true
+        } catch (error) {
+            console.error(error)
         }
     },
 
@@ -247,14 +256,14 @@ module.exports = {
     },
 
     getHelp: () => {
-        return '{\n'+
-        '    "useTCP": false,\n'+
-        '    "tcpTLS": false,\n'+
-        '    "tcpOC": true,\n'+
-        '    "tcpNonTransparentFramingChar": "\\n",\n'+
-        '    "port": 514,\n'+
-        '    "host": "255.255.255.255",\n'+
-        '    "syslogHostname": "-"\n'+
-        '}'
+        return '{\n' +
+            '    "useTCP": false,\n' +
+            '    "tcpTLS": false,\n' +
+            '    "tcpOC": true,\n' +
+            '    "tcpNonTransparentFramingChar": "\\n",\n' +
+            '    "port": 514,\n' +
+            '    "host": "255.255.255.255",\n' +
+            '    "syslogHostname": "-"\n' +
+            '}'
     }
 };
